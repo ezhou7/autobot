@@ -1,0 +1,13 @@
+setup.py
+autobot/__init__.py
+autobot/device.py
+autobot/model.py
+autobot/video.py
+autobot.egg-info/PKG-INFO
+autobot.egg-info/SOURCES.txt
+autobot.egg-info/dependency_links.txt
+autobot.egg-info/entry_points.txt
+autobot.egg-info/requires.txt
+autobot.egg-info/top_level.txt
+autobot/utils/__init__.py
+autobot/utils/fs.py

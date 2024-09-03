@@ -1,0 +1,8 @@
+Metadata-Version: 2.1
+Name: autobot
+Version: 1.0.0
+Summary: autobot
+Requires-Dist: numpy
+Requires-Dist: opencv-python
+Requires-Dist: torch
+Requires-Dist: ultralytics
