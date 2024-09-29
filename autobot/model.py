@@ -2,6 +2,7 @@ import numpy as np
 from ultralytics import YOLO
 from typing import Optional, Union
 
+from rknnlite.api import RKNNLite
 from autobot.device import AutoBotDevice
 
 
