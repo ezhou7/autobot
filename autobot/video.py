@@ -1,11 +1,16 @@
 import cv2
+import yaml
 import numpy as np
 from collections import defaultdict
 
-from ultralytics.trackers import BOTSORT 
+from ultralytics.trackers import BOTSORT
+from ultralytics.engine.results import Results
+from autobot import get_resource
 from autobot.device import AutoBotDevice
 from autobot.model import YoloModel
-from autobot.utils.postprocess import post_process_torch
+from autobot.utils import Properties
+from autobot.utils.postprocess import post_process_rknn, post_process_rknn_tracking
+from autobot.utils.yolov5 import CLASSES
 
 
 STANDARD_CAPTURE = 11
@@ -30,19 +35,37 @@ if __name__ == "__main__":
     device = AutoBotDevice()
     yolo = YoloModel(device)
     yolo.load("/home/orangepi/Documents/dev/models/yolov5s_relu.rknn")
-    tracker = BOTSORT(args=None, frame_rate=30)
 
-    track_history = defaultdict(lambda: [])
+    botsort_args = yaml.load(get_resource("botsort.yaml"))
+    props = Properties(botsort_args)
+    tracker = BOTSORT(args=props, frame_rate=30)
+
+    track_history = defaultdict(list)
 
     cap = video_capture()
     while True:
         success, frame = cap.read()
+        frame = cv2.flip(frame, 0)
 
         if not success:
             break
 
         output = yolo.infer([np.expand_dims(frame, 0)])
-        print(output)
+        boxes, classes, scores = post_process_rknn(output, frame)
+        new_boxes = np.hstack((
+            boxes, 
+            np.arange(0, boxes.shape[0]).reshape(boxes.shape[0], 1), 
+            scores.reshape(boxes.shape[0], 1),
+            classes.reshape(boxes.shape[0], 1)
+        ))
+        results = Results(
+            frame, "",
+            {i: cls for i, cls in enumerate(CLASSES)},
+            new_boxes,
+            scores
+        )
+        tracked_boxes = tracker.update(results.boxes, img=frame)
+        post_process_rknn_tracking(tracked_boxes, frame)
         # post_process_torch(output, frame)
 
         # output = yolo.track(frame)
@@ -60,7 +83,7 @@ if __name__ == "__main__":
         #     # Draw the tracking lines
         #     points = np.hstack(track).astype(np.int32).reshape((-1, 1, 2))
         #     cv2.polylines(annotated_frame, [points], isClosed=False, color=(230, 230, 230), thickness=10)
-        cv2.imshow("frame", frame)
+        cv2.imshow("YOLOv5 Detection", frame)
         if cv2.waitKey(1) & 0xFF == ord("q"):
             break
 

@@ -144,7 +144,11 @@ def post_process(input_data, anchors):
             nscores.append(s[keep])
 
     if not nclasses and not nscores:
-        return None, None, None
+        return (
+            np.empty((1, 4), dtype="int8"),
+            np.empty((1,), dtype="int8"),
+            np.empty((1,), dtype="int8")
+        )
 
     boxes = np.concatenate(nboxes)
     classes = np.concatenate(nclasses)
@@ -163,7 +167,7 @@ def draw(image, boxes, scores, classes):
 
 
 def load_anchors():
-    with open(os.path.join(realpath, "anchors_yolov5.txt"), 'r') as f:
+    with open(os.path.join(realpath, "../resources/anchors_yolov5.txt"), 'r') as f:
         values = [float(_v) for _v in f.readlines()]
         return np.array(values).reshape(3,-1,2).tolist()
 

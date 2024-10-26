@@ -9,6 +9,10 @@ autobot.egg-info/dependency_links.txt
 autobot.egg-info/entry_points.txt
 autobot.egg-info/requires.txt
 autobot.egg-info/top_level.txt
+autobot/resources/anchors_yolov5.txt
+autobot/resources/botsort.yaml
+autobot/resources/bus.jpg
 autobot/utils/__init__.py
 autobot/utils/fs.py
 autobot/utils/postprocess.py
+autobot/utils/yolov5.py
