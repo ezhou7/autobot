@@ -36,6 +36,10 @@ def post_process_rknn(results: list, frame: np.ndarray):
     for box, class_index, score in zip(boxes, classes, scores):
         x1, y1, x2, y2 = box  # Bounding box coordinates in xyxy format
         x1, y1, x2, y2 = int(x1), int(y1), int(x2), int(y2)
+
+        if class_index < 0 or class_index > len(CLASSES):
+            continue
+
         class_name = CLASSES[class_index]  # Get class name
 
         # Draw bounding box and label
@@ -47,13 +51,9 @@ def post_process_rknn(results: list, frame: np.ndarray):
 
 
 def post_process_rknn_tracking(boxes: np.ndarray, frame: np.ndarray):
-    print(frame)
     for box in boxes:
-        # print(box)
         x1, y1, x2, y2, object_id, conf, class_id, track_id = box
         x1, y1, x2, y2 = int(x1), int(y1), int(x2), int(y2)
-        # print(x1, y1, x2, y2)
-        cls = int(class_id)  # Class index
 
         # Draw bounding box and label
         cv2.rectangle(frame, (x1, y1), (x2, y2), (255, 0, 0), 2)
@@ -101,7 +101,7 @@ if __name__ == "__main__":
         scores
     )
     tracked_boxes = tracker.update(results.boxes, img=img)
-    print(tracked_boxes)
+    # print(tracked_boxes)
     post_process_rknn_tracking(tracked_boxes, img)
 
     cv2.imshow('YOLOv5 Detection', img)

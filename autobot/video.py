@@ -36,11 +36,9 @@ if __name__ == "__main__":
     yolo = YoloModel(device)
     yolo.load("/home/orangepi/Documents/dev/models/yolov5s_relu.rknn")
 
-    botsort_args = yaml.load(get_resource("botsort.yaml"))
+    botsort_args = yaml.safe_load(get_resource("botsort.yaml"))
     props = Properties(botsort_args)
     tracker = BOTSORT(args=props, frame_rate=30)
-
-    track_history = defaultdict(list)
 
     cap = video_capture()
     while True:
@@ -66,23 +64,7 @@ if __name__ == "__main__":
         )
         tracked_boxes = tracker.update(results.boxes, img=frame)
         post_process_rknn_tracking(tracked_boxes, frame)
-        # post_process_torch(output, frame)
 
-        # output = yolo.track(frame)
-        # boxes = output[0].boxes.xywh.cpu()
-        # track_ids = output[0].boxes.id.int().cpu().tolist()
-        # annotated_frame = output[0].plot()
-
-        # for box, track_id in zip(boxes, track_ids):
-        #     x, y, w, h = box
-        #     track = track_history[track_id]
-        #     track.append((float(x), float(y)))  # x, y center point
-        #     if len(track) > 30:  # retain 90 tracks for 90 frames
-        #         track.pop(0)
-
-        #     # Draw the tracking lines
-        #     points = np.hstack(track).astype(np.int32).reshape((-1, 1, 2))
-        #     cv2.polylines(annotated_frame, [points], isClosed=False, color=(230, 230, 230), thickness=10)
         cv2.imshow("YOLOv5 Detection", frame)
         if cv2.waitKey(1) & 0xFF == ord("q"):
             break

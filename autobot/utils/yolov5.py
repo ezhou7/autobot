@@ -170,7 +170,3 @@ def load_anchors():
     with open(os.path.join(realpath, "../resources/anchors_yolov5.txt"), 'r') as f:
         values = [float(_v) for _v in f.readlines()]
         return np.array(values).reshape(3,-1,2).tolist()
-
-
-if __name__ == "__main__":
-    print(load_anchors())
