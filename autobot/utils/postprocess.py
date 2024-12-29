@@ -44,8 +44,8 @@ def post_process_rknn(results: list, frame: np.ndarray):
 
         # Draw bounding box and label
         cv2.rectangle(frame, (x1, y1), (x2, y2), (0, 255, 0), 2)
-        label = f"{class_name} {score:.2f}"
-        cv2.putText(frame, label, (x1, y1 - 10), cv2.FONT_HERSHEY_SIMPLEX, 0.5, (36, 255, 12), 2)  # draw label
+        # label = f"{class_name} {score:.2f}"
+        cv2.putText(frame, "", (x1, y1 - 10), cv2.FONT_HERSHEY_SIMPLEX, 0.5, (36, 255, 12), 2)  # draw label
     
     return boxes, classes, scores
 
@@ -59,6 +59,17 @@ def post_process_rknn_tracking(boxes: np.ndarray, frame: np.ndarray):
         cv2.rectangle(frame, (x1, y1), (x2, y2), (255, 0, 0), 2)
         label = f"{object_id}"
         cv2.putText(frame, label, (x1, y1 - 10), cv2.FONT_HERSHEY_SIMPLEX, 0.5, (36, 255, 12), 2)  # draw label
+
+
+def post_process_rknn_selecting(boxes: np.ndarray, frame: np.ndarray, selected_id: int):
+    for box in boxes:
+        x1, y1, x2, y2, object_id, conf, class_id, track_id = box
+        if int(object_id) == selected_id:
+            x1, y1, x2, y2 = int(x1), int(y1), int(x2), int(y2)
+
+            # Draw bounding box and label
+            cv2.rectangle(frame, (x1, y1), (x2, y2), (0, 0, 255), 2)
+            cv2.putText(frame, "", (x1, y1 - 10), cv2.FONT_HERSHEY_SIMPLEX, 0.5, (36, 255, 12), 2)  # draw label
 
 
 class BotSortArgs:
