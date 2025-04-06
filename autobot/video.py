@@ -15,7 +15,7 @@ from autobot.utils.postprocess import post_process_rknn, post_process_rknn_track
 from autobot.utils.yolov5 import CLASSES
 
 
-STANDARD_CAPTURE = 11
+STANDARD_CAPTURE = 20
 
 
 def video_capture():
@@ -45,28 +45,31 @@ def yolo_thread(stop_flag: Event, input_queue: Queue, output_queue: Queue, cap: 
     currently_selected_id = -1
     while not stop_flag.is_set():
         success, frame = cap.read()
-        frame = cv2.flip(frame, 0)
+        # frame = cv2.flip(frame, 0)
+        frame = cv2.resize(frame, (640, 640))
+        # print(frame.shape)
 
         if not success:
             break
 
         output = yolo.infer([np.expand_dims(frame, 0)])
         boxes, classes, scores = post_process_rknn(output, frame)
-        new_boxes = np.hstack((
-            boxes, 
-            np.arange(0, boxes.shape[0]).reshape(boxes.shape[0], 1), 
-            scores.reshape(boxes.shape[0], 1),
-            classes.reshape(boxes.shape[0], 1)
-        ))
-        results = Results(
-            frame, "",
-            {i: cls for i, cls in enumerate(CLASSES)},
-            new_boxes,
-            scores
-        )
-        tracked_boxes = tracker.update(results.boxes, img=frame)
-        post_process_rknn_tracking(tracked_boxes, frame)
-        post_process_rknn_selecting(tracked_boxes, frame, currently_selected_id)
+        if len(boxes):
+            new_boxes = np.hstack((
+                boxes, 
+                np.arange(0, boxes.shape[0]).reshape(boxes.shape[0], 1), 
+                scores.reshape(boxes.shape[0], 1),
+                classes.reshape(boxes.shape[0], 1)
+            ))
+            results = Results(
+                frame, "",
+                {i: cls for i, cls in enumerate(CLASSES)},
+                new_boxes,
+                scores
+            )
+            tracked_boxes = tracker.update(results.boxes, img=frame)
+            post_process_rknn_tracking(tracked_boxes, frame)
+            post_process_rknn_selecting(tracked_boxes, frame, currently_selected_id)
         
         if not input_queue.empty():
             inp = input_queue.get()

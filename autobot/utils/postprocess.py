@@ -5,6 +5,7 @@ import numpy as np
 
 from collections import defaultdict
 from ultralytics.engine.results import Results, Boxes
+from autobot.utils import centroid
 from autobot.utils.yolov5 import post_process, load_anchors, CLASSES
 
 from ultralytics.trackers import BOTSORT
@@ -33,30 +34,38 @@ def post_process_rknn(results: list, frame: np.ndarray):
     anchors = load_anchors()
     boxes, classes, scores = post_process(results, anchors)
 
+    relevant_boxes, relevant_classes, relevant_scores = [], [], []
     for box, class_index, score in zip(boxes, classes, scores):
         x1, y1, x2, y2 = box  # Bounding box coordinates in xyxy format
         x1, y1, x2, y2 = int(x1), int(y1), int(x2), int(y2)
 
-        if class_index < 0 or class_index > len(CLASSES):
+        if class_index != 0:
             continue
 
         class_name = CLASSES[class_index]  # Get class name
 
-        # Draw bounding box and label
-        cv2.rectangle(frame, (x1, y1), (x2, y2), (0, 255, 0), 2)
-        # label = f"{class_name} {score:.2f}"
-        cv2.putText(frame, "", (x1, y1 - 10), cv2.FONT_HERSHEY_SIMPLEX, 0.5, (36, 255, 12), 2)  # draw label
+        relevant_boxes.append(box)
+        relevant_classes.append(class_index)
+        relevant_scores.append(score)
     
-    return boxes, classes, scores
+    return np.array(relevant_boxes), np.array(relevant_classes), np.array(relevant_scores)
 
 
 def post_process_rknn_tracking(boxes: np.ndarray, frame: np.ndarray):
+    fxc, fyc = centroid(0, 0, frame.shape[0], frame.shape[1])
+
     for box in boxes:
         x1, y1, x2, y2, object_id, conf, class_id, track_id = box
         x1, y1, x2, y2 = int(x1), int(y1), int(x2), int(y2)
+        xc, yc = centroid(x1, y1, x2, y2)
+        dist = np.linalg.norm(np.array((fxc, fyc)) - np.array((xc, yc)))
 
         # Draw bounding box and label
         cv2.rectangle(frame, (x1, y1), (x2, y2), (255, 0, 0), 2)
+        cv2.circle(frame, (xc, yc), radius=10, color=(0, 0, 255), thickness=-1)
+        cv2.circle(frame, (fxc, fyc), radius=10, color=(255, 0, 255), thickness=-1)
+        cv2.line(frame, (fxc, fyc), (xc, yc), color=(255, 0, 255), thickness=2)
+        cv2.putText(frame, f"{dist}", (xc, yc - 10), cv2.FONT_HERSHEY_SIMPLEX, 0.5, (36, 255, 12), 2)
         label = f"{object_id}"
         cv2.putText(frame, label, (x1, y1 - 10), cv2.FONT_HERSHEY_SIMPLEX, 0.5, (36, 255, 12), 2)  # draw label
 
