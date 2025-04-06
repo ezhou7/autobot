@@ -20,7 +20,9 @@ def setup_package():
             "numpy",
             "opencv-python",
             "torch",
-            "ultralytics"
+            "ultralytics",
+            "simple-pid",
+            "mavsdk"
         ]
     )
 
