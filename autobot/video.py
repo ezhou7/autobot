@@ -1,7 +1,6 @@
 import cv2
 import yaml
 import numpy as np
-from collections import defaultdict
 from queue import Queue
 from threading import Event, Thread
 
@@ -45,9 +44,7 @@ def yolo_thread(stop_flag: Event, input_queue: Queue, output_queue: Queue, cap: 
     currently_selected_id = -1
     while not stop_flag.is_set():
         success, frame = cap.read()
-        # frame = cv2.flip(frame, 0)
         frame = cv2.resize(frame, (640, 640))
-        # print(frame.shape)
 
         if not success:
             break
