@@ -1,3 +1,5 @@
 autobot_env/
 .idea/
 build/
+autobot.egg-info/
+**/__pycache__/

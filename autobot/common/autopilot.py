@@ -27,6 +27,7 @@ class System:
         self.is_ready = False
         self.actions:List[Action] = []
         self.current_action = ""
+        self.use_serial = use_serial
         self.port = port or self.DEFAULT_UDP_PORT
         self.serial = (serial_address if serial_address else self.DEFAULT_SERIAL_ADDRESS)
         self.mav = mavsdk.System()
@@ -68,10 +69,10 @@ class System:
         self.log.warning("queue cleared")
 
     async def connect(self):
-        if self.serial:
+        if self.use_serial and self.serial:
             address = f"serial://{self.serial}"
         else:
-            address = f"udp://{self.ip or ''}:{self.port}"
+            address = f"tcp://{self.ip or ''}:{self.port}"
         
         self.log.info(f"waiting for drone connection on address {address}")
         
@@ -295,8 +296,9 @@ class System:
 ############ TEST ############
 ##############################
 async def test():
-    drone = System(use_serial=True)
-    await drone.connect(system_address="serial:///dev/serial0:921600")  ### Serial - UART OrangePi
+    drone = System(ip="54.88.113.148", port=5760, use_serial=False)
+    await drone.connect()
+    # await drone.connect(system_address="serial:///dev/serial0:921600")  ### Serial - UART OrangePi
     # await drone.connect(system_address="serial:///dev/ttyUSB0:57600")  ### Telemetry OrangePi
     async for state in drone.mav.core.connection_state():
         if state.is_connected:

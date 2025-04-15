@@ -6,3 +6,5 @@ Requires-Dist: numpy
 Requires-Dist: opencv-python
 Requires-Dist: torch
 Requires-Dist: ultralytics
+Requires-Dist: simple-pid
+Requires-Dist: mavsdk

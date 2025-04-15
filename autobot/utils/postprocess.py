@@ -65,9 +65,8 @@ def post_process_rknn_tracking(boxes: np.ndarray, frame: np.ndarray):
         cv2.circle(frame, (xc, yc), radius=10, color=(0, 0, 255), thickness=-1)
         cv2.circle(frame, (fxc, fyc), radius=10, color=(255, 0, 255), thickness=-1)
         cv2.line(frame, (fxc, fyc), (xc, yc), color=(255, 0, 255), thickness=2)
-        cv2.putText(frame, f"{dist}", (xc, yc - 10), cv2.FONT_HERSHEY_SIMPLEX, 0.5, (36, 255, 12), 2)
-        label = f"{object_id}"
-        cv2.putText(frame, label, (x1, y1 - 10), cv2.FONT_HERSHEY_SIMPLEX, 0.5, (36, 255, 12), 2)  # draw label
+        cv2.putText(frame, str(dist), (xc, yc - 10), cv2.FONT_HERSHEY_SIMPLEX, 0.5, (36, 255, 12), 2)
+        cv2.putText(frame, str(object_id), (x1, y1 - 10), cv2.FONT_HERSHEY_SIMPLEX, 0.5, (36, 255, 12), 2)  # draw label
 
 
 def post_process_rknn_selecting(boxes: np.ndarray, frame: np.ndarray, selected_id: int):
