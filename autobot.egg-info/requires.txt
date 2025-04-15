@@ -4,3 +4,4 @@ torch
 ultralytics
 simple-pid
 mavsdk
+frozendict

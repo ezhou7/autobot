@@ -13,6 +13,7 @@ autobot.egg-info/requires.txt
 autobot.egg-info/top_level.txt
 autobot/common/__init__.py
 autobot/common/autopilot.py
+autobot/common/queue.py
 autobot/common/utils.py
 autobot/follow/__init__.py
 autobot/follow/controller.py

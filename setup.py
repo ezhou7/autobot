@@ -22,7 +22,8 @@ def setup_package():
             "torch",
             "ultralytics",
             "simple-pid",
-            "mavsdk"
+            "mavsdk",
+            "frozendict"
         ]
     )
 

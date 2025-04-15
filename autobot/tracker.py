@@ -48,7 +48,7 @@ class AutoBotTracker:
         props = Properties(botsort_args)
         return BOTSORT(args=props, frame_rate=30)
     
-    def track(self, stop_flag, input_queue):
+    def track(self, stop_flag, msg_broker):
         currently_selected_id = -1
         while not stop_flag.is_set():
             success, frame = self.cap.read()
@@ -73,11 +73,14 @@ class AutoBotTracker:
                     scores
                 )
                 tracked_boxes = self.tracker.update(results.boxes, img=frame)
-                post_process_rknn_tracking(tracked_boxes, frame)
-                post_process_rknn_selecting(tracked_boxes, frame, currently_selected_id)
+                fxc, fyc = post_process_rknn_tracking(tracked_boxes, frame)
+                xc, yc = post_process_rknn_selecting(tracked_boxes, frame, currently_selected_id)
+
+                if xc != -1 and yc != -1:
+                    msg_broker.put("tracker_to_follower", (fxc, fyc, xc, yc))
             
-            if not input_queue.empty():
-                inp = input_queue.get()
+            if not msg_broker.empty("user_input"):
+                inp = msg_broker.get("user_input")
                 if inp == 'q':
                     break
                 else:

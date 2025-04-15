@@ -82,7 +82,7 @@ class System:
         self.log.info("connection established.")
 
         # currently controlling is only available via GPS lock
-        await System.wait_for_async_value(self.mav.telemetry.health(), is_global_position_ok=True)
+        await System.wait_for_async_value(self.mav.telemetry.health(), is_global_position_ok=False)
         self.log.info("system ready.")
 
         self.is_ready = True
@@ -122,14 +122,18 @@ class System:
             return
             
         try:
+            print("UNARMED")
             await self.mav.action.arm()
+            print("ARMED")
         except ActionError as error:
             # if already armed, ignore
             self.log.error("ARM: " + str(error))
 
         try:
+            print("NOT TAKEN OFF")
             await self.mav.action.takeoff()
             await self.__wait_for_landed_state(LandedState.IN_AIR)
+            print("TAKEOFF")
         except ActionError as error:
             self.log.error("TAKEOFF: " + str(error))
 
@@ -296,7 +300,7 @@ class System:
 ############ TEST ############
 ##############################
 async def test():
-    drone = System(ip="54.88.113.148", port=5760, use_serial=False)
+    drone = System(ip="54.144.75.153", port=5760, use_serial=False)
     await drone.connect()
     # await drone.connect(system_address="serial:///dev/serial0:921600")  ### Serial - UART OrangePi
     # await drone.connect(system_address="serial:///dev/ttyUSB0:57600")  ### Telemetry OrangePi
@@ -311,3 +315,5 @@ async def test():
     await drone.takeoff()
     await asyncio.sleep(3)
     await drone.land()
+
+    await drone.close()

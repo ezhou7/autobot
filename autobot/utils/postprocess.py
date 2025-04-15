@@ -67,17 +67,25 @@ def post_process_rknn_tracking(boxes: np.ndarray, frame: np.ndarray):
         cv2.line(frame, (fxc, fyc), (xc, yc), color=(255, 0, 255), thickness=2)
         cv2.putText(frame, str(dist), (xc, yc - 10), cv2.FONT_HERSHEY_SIMPLEX, 0.5, (36, 255, 12), 2)
         cv2.putText(frame, str(object_id), (x1, y1 - 10), cv2.FONT_HERSHEY_SIMPLEX, 0.5, (36, 255, 12), 2)  # draw label
+    
+    return fxc, fyc
 
 
 def post_process_rknn_selecting(boxes: np.ndarray, frame: np.ndarray, selected_id: int):
+    chosen = [-1, -1, -1, -1]
     for box in boxes:
         x1, y1, x2, y2, object_id, conf, class_id, track_id = box
         if int(object_id) == selected_id:
             x1, y1, x2, y2 = int(x1), int(y1), int(x2), int(y2)
+            chosen = [x1, y1, x2, y2]
+            print(f"Selected id={selected_id} with coords={chosen}")
 
             # Draw bounding box and label
             cv2.rectangle(frame, (x1, y1), (x2, y2), (0, 0, 255), 2)
             cv2.putText(frame, "", (x1, y1 - 10), cv2.FONT_HERSHEY_SIMPLEX, 0.5, (36, 255, 12), 2)  # draw label
+
+    print(chosen)
+    return centroid(*chosen)
 
 
 class BotSortArgs:

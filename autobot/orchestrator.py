@@ -2,18 +2,19 @@ from queue import Queue
 from threading import Event, Thread
 
 from autobot.tracker import AutoBotTracker
+from autobot.common.queue import MessageBroker
 
 
 class Orchestrator:
     def __init__(self, thread_functions):
-        self.input_queue = Queue()
+        self.msg_broker = MessageBroker(topics=["user_input", "tracker_to_follower"])
         self.stop_flag = Event()
         self.thread_functions = thread_functions
         self.threads = self.__load_threads()
     
     def __load_threads(self):
         return [
-            Thread(target=f, args=(self.stop_flag, self.input_queue))
+            Thread(target=f, args=(self.stop_flag, self.msg_broker))
             for f in self.thread_functions
         ]
     
@@ -23,9 +24,8 @@ class Orchestrator:
 
         yolo_model_path = "/home/orangepi/Documents/dev/models/yolov5s_relu.rknn"
         autobot_tracker = AutoBotTracker(yolo_model_path=yolo_model_path)
-        autobot_tracker.track(self.stop_flag, self.input_queue)
+        autobot_tracker.track(self.stop_flag, self.msg_broker)
 
-        self.input_queue.put('q')
         for thread in self.threads:
             thread.join()
         
