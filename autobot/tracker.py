@@ -81,9 +81,7 @@ class AutoBotTracker:
             
             if not msg_broker.empty("user_input"):
                 inp = msg_broker.get("user_input")
-                if inp == 'q':
-                    break
-                else:
+                if inp.isnumeric():
                     currently_selected_id = int(inp)
 
             cv2.imshow("YOLOv5 Detection", frame)

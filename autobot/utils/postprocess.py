@@ -78,13 +78,11 @@ def post_process_rknn_selecting(boxes: np.ndarray, frame: np.ndarray, selected_i
         if int(object_id) == selected_id:
             x1, y1, x2, y2 = int(x1), int(y1), int(x2), int(y2)
             chosen = [x1, y1, x2, y2]
-            print(f"Selected id={selected_id} with coords={chosen}")
 
             # Draw bounding box and label
             cv2.rectangle(frame, (x1, y1), (x2, y2), (0, 0, 255), 2)
             cv2.putText(frame, "", (x1, y1 - 10), cv2.FONT_HERSHEY_SIMPLEX, 0.5, (36, 255, 12), 2)  # draw label
 
-    print(chosen)
     return centroid(*chosen)
 
 

@@ -1,9 +1,11 @@
 import asyncio
+import numpy as np
 from threading import Event
 
 from autobot.common.autopilot import System
 from autobot.common.queue import MessageBroker
 from autobot.orchestrator import Orchestrator
+from autobot.follow.controller import Controller
 
 
 def execute_input_thread(stop_flag: Event, msg_broker: MessageBroker):
@@ -14,33 +16,35 @@ def execute_input_thread(stop_flag: Event, msg_broker: MessageBroker):
         msg_broker.put("user_input", user_input)
 
 
-async def sitl_thread(stop_flag: Event, msg_broker: MessageBroker):
+async def sitl_function(stop_flag: Event, msg_broker: MessageBroker):
     drone = System(ip="54.144.75.153", port=5760, use_serial=False)
     await drone.connect()
     async for state in drone.mav.core.connection_state():
-        print(state)
         if state.is_connected:
             print("Drone discovered!")
             break
 
     # print(await System.get_async_generated(drone.mav.telemetry.position()))
 
+    controller = Controller(320, 320)
     await drone.takeoff(check_state=False)
+    await drone.start_offboard()
     while not stop_flag.is_set():
         if not msg_broker.empty("tracker_to_follower"):
-            fxc, fyc, xc, yc = msg_broker.get("tracker_to_follower")
-            print(f"Received centroids: frame={(fxc, fyc)}, obj={(xc, yc)}")
+            _, _, xc, yc = msg_broker.get("tracker_to_follower")
+            # print(f"Received centroids: obj={(xc, yc)}")
+            print(f"Controller output={controller.control(np.array((0, 0)), np.array((xc, yc)))}")
+            yaw, fwd = controller.control(np.array((0, 0)), np.array((xc, yc)))
+            await drone.set_velocity(forward=fwd, yaw=yaw)
         await asyncio.sleep(2)
 
     await drone.land()
-    print("Disconnected")
-
 
 
 def async_thread(stop_flag: Event, msg_broker: MessageBroker):
     loop = asyncio.new_event_loop()
     asyncio.set_event_loop(loop)
-    loop.run_until_complete(sitl_thread(stop_flag, msg_broker))
+    loop.run_until_complete(sitl_function(stop_flag, msg_broker))
     loop.close()
 
 
