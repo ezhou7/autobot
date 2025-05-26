@@ -9,3 +9,4 @@ Requires-Dist: ultralytics
 Requires-Dist: simple-pid
 Requires-Dist: mavsdk
 Requires-Dist: frozendict
+Requires-Dist: PyGObject

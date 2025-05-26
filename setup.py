@@ -23,7 +23,8 @@ def setup_package():
             "ultralytics",
             "simple-pid",
             "mavsdk",
-            "frozendict"
+            "frozendict",
+            "PyGObject"
         ]
     )
 

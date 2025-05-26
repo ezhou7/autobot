@@ -5,3 +5,4 @@ ultralytics
 simple-pid
 mavsdk
 frozendict
+PyGObject

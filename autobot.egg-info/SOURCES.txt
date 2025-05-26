@@ -21,6 +21,8 @@ autobot/follow/follow.py
 autobot/resources/anchors_yolov5.txt
 autobot/resources/botsort.yaml
 autobot/resources/bus.jpg
+autobot/rtsp/__init__.py
+autobot/rtsp/rtsp_server.py
 autobot/utils/__init__.py
 autobot/utils/fs.py
 autobot/utils/postprocess.py
