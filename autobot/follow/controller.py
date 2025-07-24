@@ -4,10 +4,11 @@ from autobot.common import utils
 import numpy as np
 import time
 
+
 class Controller:
     """Wrapper class for the simple_pid library.
-    
-    Implements two PID controllers for obtaining yaw and forward 
+
+    Implements two PID controllers for obtaining yaw and forward
     velocity outputs from a detected bounding box."""
 
     MAX_FWD_VEL = 0.4
@@ -23,7 +24,7 @@ class Controller:
 
     def __init__(self, target_x, target_height, invert_yaw=False) -> None:
         self.log = utils.stdout_logger(__name__)
-        
+
         self.yaw_pid = PID()
         self.yaw_pid.tunings = self.DEFAULT_YAW_TUNINGS
         self.yaw_pid.setpoint = target_x
@@ -34,10 +35,9 @@ class Controller:
         self.fwd_pid.tunings = self.DEFAULT_FWD_TUNINGS
         self.fwd_pid.setpoint = target_height
         self.fwd_pid.output_limits = (-self.MAX_FWD_VEL, self.MAX_FWD_VEL)
-        
+
         self.reset()
 
-    
     def control(self, p1, p2):
         if np.array_equal(p1, self.ZEROES) and np.array_equal(p2, self.ONES):
             return 0, 0
@@ -61,10 +61,9 @@ class Controller:
         self._fwd_output_detail_list.append(self.fwd_pid.components)
         self._time_list.append(time.time() - self._start_time)
 
-        self.last_yaw_vel = (float)(yaw_vel)
-        self.last_fwd_vel = (float)(fwd_vel)
+        self.last_yaw_vel = float(yaw_vel)
+        self.last_fwd_vel = float(fwd_vel)
         return yaw_vel, fwd_vel
-
 
     def reset(self):
         self._yaw_setpoint_list = []
@@ -83,11 +82,9 @@ class Controller:
         self.yaw_pid.reset()
         self.fwd_pid.reset()
 
-
     @staticmethod
     def is_pid_on(pid: PID):
         return pid.tunings != (0, 0, 0)
-
 
     def get_yaw_error(self, p1, p2):
         current = self.__get_yaw_point_from_box(p1, p2)
@@ -118,14 +115,14 @@ class Controller:
     def __get_yaw_point_from_box(p1, p2):
         mid_point = p1 + (p2 - p1) / 2.0
         return mid_point[0]
-        
+
     @staticmethod
     def __get_fwd_point_from_box(p1, p2):
-        return (float)(p2[1] - p1[1])
+        return float(p2[1] - p1[1])
 
     @staticmethod
     def get_input(p1, p2):
-        return (Controller.__get_yaw_point_from_box(p1, p2), Controller.__get_fwd_point_from_box(p1, p2))
+        return Controller.__get_yaw_point_from_box(p1, p2), Controller.__get_fwd_point_from_box(p1, p2)
 
 
 ##########################################################
@@ -146,11 +143,13 @@ def get_points(i):
         factor = (90 - i) / (90 - 51)
         return interpolate(factor, center_p1, center_p2, right_p1, right_p2)
 
+
 def interpolate(factor, start_p1, start_p2, end_p1, end_p2):
     int_p1 = (end_p1[0] - start_p1[0]) * factor + start_p1[0]
     int_p2 = (end_p2[0] - start_p2[0]) * factor + start_p2[0]
     return (np.array((int_p1, np.interp(int_p1, [start_p1[0], end_p1[0]], [start_p1[1], end_p1[1]]))),
             np.array((int_p2, np.interp(int_p2, [start_p2[0], end_p2[0]], [start_p2[1], end_p2[1]]))))
+
 
 if __name__ == "__main__":
 

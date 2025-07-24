@@ -20,7 +20,7 @@ YAW_POINT = 0.5 # Target mid-point of screen
 FWD_POINT = 0.5 # Target 50% of screen height 
 
 
-class Follow():
+class Follow:
     def __init__(self, ip="", port=None, serial=None, simulator_ip=None, log=None):
         """
         Follow-person control solution.
@@ -54,7 +54,6 @@ class Follow():
         self.is_keyboard_control_on = True
         self.measures = {}
 
-
     async def run(self):
         """Entry point for the running loop."""
         if not self.pilot.is_ready:
@@ -79,12 +78,10 @@ class Follow():
                 
         #         await self.measure(asyncio.sleep, 0.001)
 
-
     def subscribe_to_image(self, func):
         """Subscribe a function to the image event,
         to be called everytime a new frame is processed with the detected bounding box."""
         self.image_events.append(func)
-
     
     async def measure(self, func, *args, is_async=True):
         """Call a function and log the execution time to the measures dictionary."""
@@ -92,7 +89,6 @@ class Follow():
         if func_name not in self.measures:
             self.measures[func_name] = []
         return await utils.measure(func, self.measures[func_name], is_async, *args)
-
 
     def log_measures(self):
         """Output average execution time for each recorded function across all iterations run."""
@@ -104,14 +100,12 @@ class Follow():
                 self.log.info(f"{i} - {key}: mean {np.mean(self.measures[key])} var {np.var(self.measures[key])}")
             self.measures[key] = []
 
-
     def get_pilot_telemetry(self):
         telemetry = [self._pilot_time_list, self._pilot_pos_list, self._pilot_vel_list]
         self._pilot_time_list = []
         self._pilot_pos_list = []
         self._pilot_vel_list = []
         return telemetry
-
 
     def close(self):
         """Close external modules and tools."""
@@ -121,7 +115,6 @@ class Follow():
             continue
 
         self.log_measures()
-                
 
     # async def __process_image(self, pose):
     #     """Run pose detection algorithm on a new frame and store bounding box."""
@@ -139,7 +132,6 @@ class Follow():
     #     self.p1, self.p2 = await self.measure(image_processing.detect, self.results, image, is_async=False)
     #     self.__show_image(image)
 
-
     def __show_image(self, image):
         """Annotate image and show in a window."""
         inputs = Controller.get_input(self.p1, self.p2)
@@ -153,11 +145,9 @@ class Follow():
         except cv2.error as e:
             self.log.error("Error rendering image:\n" + str(e))
 
-
     async def __fly(self, yaw, fwd):
         """Make the vehicle move with a set velocity."""
         await self.pilot.set_velocity(forward=fwd, yaw=yaw)
-
 
     async def __offboard_control(self, p1, p2):
         """Check offboard control for driving the vehicle."""
@@ -176,7 +166,6 @@ class Follow():
             self._pilot_pos_list.append(await self.pilot.get_position_ned_yaw())
             self._pilot_vel_list.append([await self.pilot.get_ground_velocity_mag(), await self.pilot.get_yaw_velocity()])
 
-
     # async def __manual_input_control(self, pose):
     #     """Handle manual input to the pilot through the keyboard."""
     #     key = cv2.waitKey(self.source.get_delay())
@@ -191,14 +180,12 @@ class Follow():
     #         elif SolutionBase.__name__ in key_action.__qualname__:
     #             key_action(pose, self.source.get_blank())
 
-
     # def __get_source(self, ip, use_simulator):
     #     """Select video source from the command-line options."""
     #     if use_simulator:
     #         return SimulatorSource(ip)
     #     else:
     #         return CameraSource()
-
 
     async def __on_new_image(self):
         """Call all subscribed functions to the image event."""

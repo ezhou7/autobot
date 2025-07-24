@@ -33,8 +33,8 @@ async def sitl_function(stop_flag: Event, msg_broker: MessageBroker):
         if not msg_broker.empty("tracker_to_follower"):
             _, _, xc, yc = msg_broker.get("tracker_to_follower")
             # print(f"Received centroids: obj={(xc, yc)}")
-            print(f"Controller output={controller.control(np.array((0, 0)), np.array((xc, yc)))}")
             yaw, fwd = controller.control(np.array((0, 0)), np.array((xc, yc)))
+            print(f"yaw={yaw}, fwd={fwd}")
             await drone.set_velocity(forward=fwd, yaw=yaw)
         await asyncio.sleep(2)
 

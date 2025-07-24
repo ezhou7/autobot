@@ -21,7 +21,6 @@ class System:
     DEFAULT_UDP_PORT = 14540
     TIMEOUT = 15
 
-
     def __init__(self, ip=None, port=None, use_serial=False, serial_address=None):
         self.ip = ip
         self.is_ready = False
@@ -52,8 +51,7 @@ class System:
                     await asyncio.sleep(self.SLEEP_TIME)
         except asyncio.exceptions.CancelledError:
            self.log.warning("system stop")
-        
-    
+
     def queue_action(self, func: Callable, interrupt: bool = False, **kwargs: dict):
         if interrupt:
             self.clear_queue()
@@ -87,16 +85,13 @@ class System:
 
         self.is_ready = True
     
-    
     async def is_connected(self):
         """Check if the system is connected via MAVLink."""
         return (await System.get_async_generated(self.mav.core.connection_state())).is_connected
     
-    
     async def kill_motors(self):
         await self.mav.action.kill()
-    
-    
+
     async def hold(self):
         try:
             await self.mav.action.hold()
@@ -148,14 +143,12 @@ class System:
             self.log.error("LAND: " + str(error))
 
         await self.__landing_finished()
-
     
     async def toggle_takeoff_land(self):
         if await self.get_landed_state() == LandedState.ON_GROUND:
             await self.takeoff(False)
         else:
             await self.land()
-
 
     async def start_offboard(self):
         """Start offboard mode where the system's movement can be directly controlled."""
@@ -172,7 +165,6 @@ class System:
             return
 
         self.log.info("System in offboard mode")
-
     
     async def stop_offboard(self):
         """Exit offboard mode and return to hold."""
@@ -186,14 +178,12 @@ class System:
 
         self.log.info("System exited offboard mode")
 
-
     async def toggle_offboard(self):
         """Toggle offboard according to the current state."""
         if await self.is_offboard():
             await self.stop_offboard()
         else:
             await self.start_offboard()
-
 
     async def set_velocity(self, forward=0.0, right=0.0, up=0.0, yaw=0.0):
         """Set the system's velocity in body coordinates."""
@@ -203,7 +193,6 @@ class System:
             await self.mav.offboard.set_velocity_body(
                 VelocityBodyYawspeed(forward, right, -up, yaw))
 
-    
     async def move_body_velocity(self, forward=0.0, right=0.0, up=0.0, yaw=0.0, time=1):
         """Move in a particular direction for a set time."""
         await self.set_velocity(forward, right, up, yaw)
@@ -229,55 +218,44 @@ class System:
     async def move_up(self): await self.move_body_velocity(up=0.5)
     async def move_down(self): await self.move_body_velocity(up=-0.5)
 
-
     async def get_position(self):
         return await System.get_async_generated(self.mav.telemetry.position())
-
 
     async def get_position_ned_yaw(self):
         pos_ned = (await System.get_async_generated(self.mav.telemetry.position_velocity_ned())).position
         yaw = (await System.get_async_generated(self.mav.telemetry.heading())).heading_deg
         return PositionNedYaw(pos_ned.north_m, pos_ned.east_m, pos_ned.down_m, yaw)
 
-
     async def get_attitude(self):
         return await System.get_async_generated(self.mav.telemetry.attitude_euler())
-
 
     async def get_yaw_velocity(self):
         yaw_vel = (await System.get_async_generated(self.mav.telemetry.attitude_angular_velocity_body()))
         return yaw_vel.yaw_rad_s * 180 / math.pi
-    
 
     async def get_ground_velocity(self):
         return await System.get_async_generated(self.mav.telemetry.velocity_ned())
-    
 
     async def get_ground_velocity_mag(self):
         vel_ned =  await self.get_ground_velocity()
         return (vel_ned.north_m_s ** 2 + vel_ned.east_m_s ** 2) ** 0.5
 
-
     async def get_landed_state(self):
         """Return current system landed state"""
         return await System.get_async_generated(self.mav.telemetry.landed_state())
-
 
     async def get_flight_mode(self):
         """Return current system flight mode"""
         return await System.get_async_generated(self.mav.telemetry.flight_mode())
 
-    
     async def is_offboard(self):
         return await self.mav.offboard.is_active()
-
 
     async def __landing_finished(self):
         """Runs until the drone has finished landing."""
         await self.__wait_for_landed_state(LandedState.ON_GROUND)
         await self.wait_for_async_value(self.mav.telemetry.armed(), False)
         self.log.info("Landing complete")
-    
 
     async def __wait_for_landed_state(self, landed_state: LandedState):
         """Wait until the system's landed state match the expected one."""
@@ -294,8 +272,8 @@ class System:
             if ((value is None or item == value) and
                 (kwargs is None or len(kwargs) == 0 or all([getattr(item, key) == kwargs[key] for key in kwargs.keys()]))):
                 break
-    
-    
+
+
 ##############################
 ############ TEST ############
 ##############################
