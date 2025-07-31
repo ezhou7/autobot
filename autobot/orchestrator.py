@@ -7,7 +7,11 @@ from autobot.common.queue import MessageBroker
 
 class Orchestrator:
     def __init__(self, thread_functions):
-        self.msg_broker = MessageBroker(topics=["user_input", "tracker_to_follower"])
+        self.msg_broker = MessageBroker(topics=[
+            "user_input",
+            "tracker_to_follower",
+            "tracker_to_lidar"
+        ])
         self.stop_flag = Event()
         self.thread_functions = thread_functions
         self.threads = self.__load_threads()

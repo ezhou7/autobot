@@ -6,6 +6,7 @@ from autobot.common.autopilot import System
 from autobot.common.queue import MessageBroker
 from autobot.orchestrator import Orchestrator
 from autobot.follow.controller import Controller
+from autobot.common.lidar import LIDARLite
 
 
 def execute_input_thread(stop_flag: Event, msg_broker: MessageBroker):
@@ -14,6 +15,17 @@ def execute_input_thread(stop_flag: Event, msg_broker: MessageBroker):
         if user_input == 'q':
             stop_flag.set()
         msg_broker.put("user_input", user_input)
+
+
+def lidar_thread(stop_flag: Event, msg_broker: MessageBroker):
+    distance_error_threshold = 10
+    lidar = LIDARLite()
+    while not stop_flag.is_set():
+        if not msg_broker.empty("tracker_to_lidar"):
+            fxc, fyc, xc, yc = msg_broker.get("tracker_to_lidar")
+            if np.linalg.norm(np.array([fxc, fyc]) - np.array([xc, yc])) < distance_error_threshold:
+                dist_to_target = lidar.read_distance_v3hp()
+                print(f"Distance to target={dist_to_target}")
 
 
 async def sitl_function(stop_flag: Event, msg_broker: MessageBroker):
@@ -49,5 +61,9 @@ def async_thread(stop_flag: Event, msg_broker: MessageBroker):
 
 
 if __name__ == "__main__":
-    orchestrator = Orchestrator([execute_input_thread, async_thread])
+    orchestrator = Orchestrator([
+        execute_input_thread,
+        lidar_thread,
+        async_thread
+    ])
     orchestrator.execute()

@@ -78,6 +78,7 @@ class AutoBotTracker:
 
                 if xc != -1 and yc != -1:
                     msg_broker.put("tracker_to_follower", (fxc, fyc, xc, yc))
+                    msg_broker.put("tracker_to_lidar", (fxc, fyc, xc, yc))
             
             if not msg_broker.empty("user_input"):
                 inp = msg_broker.get("user_input")
