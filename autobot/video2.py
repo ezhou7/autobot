@@ -7,6 +7,7 @@ from autobot.common.queue import MessageBroker
 from autobot.orchestrator import Orchestrator
 from autobot.follow.controller import Controller
 from autobot.common.lidar import LIDARLite
+from autobot.common.tf_luna_lidar import TFLunaLidar
 
 
 def execute_input_thread(stop_flag: Event, msg_broker: MessageBroker):
@@ -26,6 +27,18 @@ def lidar_thread(stop_flag: Event, msg_broker: MessageBroker):
             if np.linalg.norm(np.array([fxc, fyc]) - np.array([xc, yc])) < distance_error_threshold:
                 dist_to_target = lidar.read_distance_v3hp()
                 print(f"Distance to target={dist_to_target}")
+
+
+def downward_lidar_thread(stop_flag: Event, msg_broker: MessageBroker):
+    lidar = TFLunaLidar()
+    print(lidar.get_version())
+    lidar.set_sample_rate(100)
+
+    while not stop_flag.is_set():
+        dist, strength, temp = lidar.read_data()
+        print(f"height={dist}, signal strength={strength}, temperature={temp}")
+
+    lidar.ser.close()
 
 
 async def sitl_function(stop_flag: Event, msg_broker: MessageBroker):
