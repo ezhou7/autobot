@@ -10,7 +10,7 @@ from mavsdk.action import ActionError
 
 from autobot.common import utils
 # from dronecontrol.common.video_source import CameraSource, SimulatorSource
-from autobot.common.autopilot import System
+from autobot.common.flight_controller import System
 # from autobot.follow import image_processing
 from autobot.follow.controller import Controller
 

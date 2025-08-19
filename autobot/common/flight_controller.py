@@ -9,13 +9,14 @@ from mavsdk.telemetry import LandedState, FlightMode
 from mavsdk.offboard import OffboardError, VelocityBodyYawspeed, PositionNedYaw
 from autobot.common import utils
 
+
 class Action(NamedTuple):
     func: Callable
     kwargs: dict
 
 
 class System:
-    STOP_VELOCITY = VelocityBodyYawspeed(0.0,0.0,0.0,0.0)
+    STOP_VELOCITY = VelocityBodyYawspeed(0.0, 0.0, 0.0, 0.0)
     SLEEP_TIME = 0.05
     DEFAULT_SERIAL_ADDRESS = "/dev/ttyUSB0"
     DEFAULT_UDP_PORT = 14540
@@ -24,7 +25,7 @@ class System:
     def __init__(self, ip=None, port=None, use_serial=False, serial_address=None):
         self.ip = ip
         self.is_ready = False
-        self.actions:List[Action] = []
+        self.actions: List[Action] = []
         self.current_action = ""
         self.use_serial = use_serial
         self.port = port or self.DEFAULT_UDP_PORT
@@ -43,21 +44,21 @@ class System:
                     self.current_action = action.func.__name__
                     self.log.info(f"running action {self.current_action}")
                     try:
-                        await asyncio.wait_for(action.func(self,**action.kwargs), timeout=10)
+                        await asyncio.wait_for(action.func(self, **action.kwargs), timeout=10)
                     except asyncio.exceptions.TimeoutError:
                         self.log.warning(f"timeout waiting for {self.current_action}")
                     self.current_action = ""
                 else:
                     await asyncio.sleep(self.SLEEP_TIME)
         except asyncio.exceptions.CancelledError:
-           self.log.warning("system stop")
+            self.log.warning("system stop")
 
     def queue_action(self, func: Callable, interrupt: bool = False, **kwargs: dict):
         if interrupt:
             self.clear_queue()
         if func is None:
             return
-        
+
         action = Action(func, kwargs)
         self.actions.append(action)
         self.log.info(f"queue action: {func.__name__}")
@@ -71,9 +72,9 @@ class System:
             address = f"serial://{self.serial}"
         else:
             address = f"tcp://{self.ip or ''}:{self.port}"
-        
+
         self.log.info(f"waiting for drone connection on address {address}")
-        
+
         await asyncio.wait_for(self.mav.connect(system_address=address), timeout=self.TIMEOUT)
 
         await System.wait_for_async_value(self.mav.core.connection_state(), is_connected=True)
@@ -84,11 +85,11 @@ class System:
         self.log.info("system ready.")
 
         self.is_ready = True
-    
+
     async def is_connected(self):
         """Check if the system is connected via MAVLink."""
         return (await System.get_async_generated(self.mav.core.connection_state())).is_connected
-    
+
     async def kill_motors(self):
         await self.mav.action.kill()
 
@@ -107,15 +108,15 @@ class System:
             self.log.error("RETURN: " + str(error))
 
         await self.__landing_finished()
-    
+
     async def takeoff(self, check_state=True):
         """Takeoff.
-        
+
         Finishes when the system arrives at the minimum takeoff altitude."""
         if check_state and await self.get_landed_state() != LandedState.ON_GROUND:
             self.log.warning("Cannot take-off, not on ground")
             return
-            
+
         try:
             print("UNARMED")
             await self.mav.action.arm()
@@ -132,10 +133,9 @@ class System:
         except ActionError as error:
             self.log.error("TAKEOFF: " + str(error))
 
-
     async def land(self):
         """Land.
-        
+
         Finishes when the system is in the ground."""
         try:
             await self.mav.action.land()
@@ -143,7 +143,7 @@ class System:
             self.log.error("LAND: " + str(error))
 
         await self.__landing_finished()
-    
+
     async def toggle_takeoff_land(self):
         if await self.get_landed_state() == LandedState.ON_GROUND:
             await self.takeoff(False)
@@ -165,7 +165,7 @@ class System:
             return
 
         self.log.info("System in offboard mode")
-    
+
     async def stop_offboard(self):
         """Exit offboard mode and return to hold."""
         await self.mav.offboard.set_velocity_body(self.STOP_VELOCITY)
@@ -199,7 +199,6 @@ class System:
         await asyncio.sleep(time)
         await self.set_velocity()
 
-    
     async def set_position_ned_yaw(self, position: PositionNedYaw):
         """Move the system to a target position."""
         if not await self.is_offboard():
@@ -207,16 +206,30 @@ class System:
         else:
             await self.mav.offboard.set_position_ned(position)
 
-
     # Utility functions to move in every direction
-    async def move_yaw_right(self): await self.move_body_velocity(yaw=2)
-    async def move_yaw_left(self): await self.move_body_velocity(yaw=-2)
-    async def move_fwd_positive(self): await self.move_body_velocity(forward=1)
-    async def move_fwd_negative(self): await self.move_body_velocity(forward=-1)
-    async def move_right(self): await self.move_body_velocity(right=1)
-    async def move_left(self): await self.move_body_velocity(right=-1)
-    async def move_up(self): await self.move_body_velocity(up=0.5)
-    async def move_down(self): await self.move_body_velocity(up=-0.5)
+    async def move_yaw_right(self):
+        await self.move_body_velocity(yaw=2)
+
+    async def move_yaw_left(self):
+        await self.move_body_velocity(yaw=-2)
+
+    async def move_fwd_positive(self):
+        await self.move_body_velocity(forward=1)
+
+    async def move_fwd_negative(self):
+        await self.move_body_velocity(forward=-1)
+
+    async def move_right(self):
+        await self.move_body_velocity(right=1)
+
+    async def move_left(self):
+        await self.move_body_velocity(right=-1)
+
+    async def move_up(self):
+        await self.move_body_velocity(up=0.5)
+
+    async def move_down(self):
+        await self.move_body_velocity(up=-0.5)
 
     async def get_position(self):
         return await System.get_async_generated(self.mav.telemetry.position())
@@ -229,6 +242,20 @@ class System:
     async def get_attitude(self):
         return await System.get_async_generated(self.mav.telemetry.attitude_euler())
 
+    async def get_altitude(self):
+        """
+        Return altitude of drone. Altitude is measured using a LiDAR sensor,
+        hence we use `distance_sensor()` here. If the LiDAR returns bad/invalid data,
+        then we revert to internal barometer measurements for altitude measurements.
+        :return: a numerical value in meters
+        """
+        alt = await System.get_async_generated(self.mav.telemetry.distance_sensor())
+        if alt == -1.0:
+            alt_obj = await System.get_async_generated(self.mav.telemetry.altitude())
+            alt = alt_obj.altitude_amsl_m
+
+        return alt
+
     async def get_yaw_velocity(self):
         yaw_vel = (await System.get_async_generated(self.mav.telemetry.attitude_angular_velocity_body()))
         return yaw_vel.yaw_rad_s * 180 / math.pi
@@ -237,7 +264,7 @@ class System:
         return await System.get_async_generated(self.mav.telemetry.velocity_ned())
 
     async def get_ground_velocity_mag(self):
-        vel_ned =  await self.get_ground_velocity()
+        vel_ned = await self.get_ground_velocity()
         return (vel_ned.north_m_s ** 2 + vel_ned.east_m_s ** 2) ** 0.5
 
     async def get_landed_state(self):
@@ -260,38 +287,16 @@ class System:
     async def __wait_for_landed_state(self, landed_state: LandedState):
         """Wait until the system's landed state match the expected one."""
         await System.wait_for_async_value(self.mav.telemetry.landed_state(), landed_state)
-    
+
     @staticmethod
     async def get_async_generated(generator):
         async for item in generator:
             return item
 
     @staticmethod
-    async def wait_for_async_value(generator, value = None, **kwargs):
+    async def wait_for_async_value(generator, value=None, **kwargs):
         async for item in generator:
             if ((value is None or item == value) and
-                (kwargs is None or len(kwargs) == 0 or all([getattr(item, key) == kwargs[key] for key in kwargs.keys()]))):
+                    (kwargs is None or len(kwargs) == 0 or all(
+                        [getattr(item, key) == kwargs[key] for key in kwargs.keys()]))):
                 break
-
-
-##############################
-############ TEST ############
-##############################
-async def test():
-    drone = System(ip="54.144.75.153", port=5760, use_serial=False)
-    await drone.connect()
-    # await drone.connect(system_address="serial:///dev/serial0:921600")  ### Serial - UART OrangePi
-    # await drone.connect(system_address="serial:///dev/ttyUSB0:57600")  ### Telemetry OrangePi
-    async for state in drone.mav.core.connection_state():
-        if state.is_connected:
-            print("Drone discovered!")
-            break
-
-    print(await System.get_async_generated(drone.mav.telemetry.position()))
-
-    await asyncio.sleep(1)
-    await drone.takeoff()
-    await asyncio.sleep(3)
-    await drone.land()
-
-    await drone.close()

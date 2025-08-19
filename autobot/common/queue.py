@@ -2,7 +2,7 @@ from frozendict import frozendict
 from queue import Queue
 
 
-class MessageBroker():
+class MessageBroker:
     def __init__(self, topics: list[str]):
         self.topics = frozendict({topic: Queue() for topic in topics})
     

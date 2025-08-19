@@ -5,6 +5,18 @@ from serial import Serial
 class TFLunaLidar:
     """
     Inspiration for this code: https://github.com/makerportal/tfluna-python/blob/main/tfluna_realtime.py
+
+    Ex. usage:
+    def downward_lidar_thread(stop_flag: Event, msg_broker: MessageBroker):
+        lidar = TFLunaLidar()
+        print(lidar.get_version())
+        lidar.set_sample_rate(100)
+
+        while not stop_flag.is_set():
+            dist, strength, temp = lidar.read_data()
+            print(f"height={dist}, signal strength={strength}, temperature={temp}")
+
+        lidar.ser.close()
     """
     def __init__(self, baudrate = 57600):
         self.baudrate = baudrate
