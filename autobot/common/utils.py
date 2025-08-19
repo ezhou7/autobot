@@ -5,6 +5,7 @@ import time
 LOGGING_FORMAT = '%(levelname)s:%(name)s: %(message)s'
 SYSTEM_INFO_FORMATTER = '%(asctime)s,%(message)s'
 
+
 def stdout_logger(name: str, level=logging.INFO) -> logging.Logger:
     """Return a dedicated logger for a module."""
     log = logging.getLogger(name)
@@ -16,6 +17,7 @@ def stdout_logger(name: str, level=logging.INFO) -> logging.Logger:
         handler.setFormatter(logging.Formatter(LOGGING_FORMAT))
         log.addHandler(handler)
     return log
+
 
 def get_wsl_host_ip():
     """
@@ -39,10 +41,12 @@ async def measure(func, time_list: list, is_async: bool, *args):
     
     Adds the time to the end of the list of values provided in time_list."""
     start_time = time.perf_counter()
+
     if is_async:
         result = await func(*args)
     else:
         result = func(*args)
     end_time = time.perf_counter()
     time_list.append(end_time - start_time)
+
     return result

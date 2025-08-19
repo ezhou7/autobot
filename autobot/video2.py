@@ -2,6 +2,7 @@ import asyncio
 import numpy as np
 from threading import Event
 
+from autobot.common import VIDEO_FRAME_WIDTH, VIDEO_FRAME_HEIGHT
 from autobot.common.flight_controller import System
 from autobot.common.queue import MessageBroker
 from autobot.orchestrator import Orchestrator
@@ -38,7 +39,7 @@ async def sitl_function(stop_flag: Event, msg_broker: MessageBroker):
 
     # print(await System.get_async_generated(drone.mav.telemetry.position()))
 
-    controller = Controller(320, 320)
+    controller = Controller(VIDEO_FRAME_WIDTH // 2, VIDEO_FRAME_HEIGHT // 2)
     await drone.takeoff(check_state=False)
     await drone.start_offboard()
     while not stop_flag.is_set():
