@@ -10,7 +10,6 @@ from autobot.utils.yolov5 import post_process, load_anchors, CLASSES
 
 from ultralytics.trackers import BOTSORT
 from ultralytics.utils.ops import xyxy2xywh
-from autobot.device import AutoBotDevice
 from autobot.model import YoloModel
 
 
@@ -93,8 +92,7 @@ class BotSortArgs:
 
 
 if __name__ == "__main__":
-    device = AutoBotDevice()
-    yolo = YoloModel(device)
+    yolo = YoloModel()
     yolo.load("/home/orangepi/Documents/dev/models/yolov5s_relu.rknn")
     
     with open(os.path.join(os.path.dirname(os.path.abspath(__file__)), "../resources/botsort.yaml"), 'r') as botfile:

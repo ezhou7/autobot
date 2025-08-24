@@ -1,8 +1,0 @@
-numpy
-opencv-python
-torch
-ultralytics
-simple-pid
-mavsdk
-frozendict
-PyGObject

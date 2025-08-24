@@ -1,5 +1,5 @@
 autobot_env/
 .idea/
 build/
-autobot.egg-info/
+*.egg-info/
 **/__pycache__/

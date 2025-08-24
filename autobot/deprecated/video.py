@@ -7,7 +7,6 @@ from threading import Event, Thread
 from ultralytics.trackers import BOTSORT
 from ultralytics.engine.results import Results
 from autobot import get_resource
-from autobot.device import AutoBotDevice
 from autobot.model import YoloModel
 from autobot.utils import Properties
 from autobot.utils.postprocess import post_process_rknn, post_process_rknn_tracking, post_process_rknn_selecting
@@ -33,8 +32,7 @@ def video_capture():
 
 
 def yolo_thread(stop_flag: Event, input_queue: Queue, output_queue: Queue, cap: cv2.VideoCapture):
-    device = AutoBotDevice()
-    yolo = YoloModel(device)
+    yolo = YoloModel()
     yolo.load("/home/orangepi/Documents/dev/models/yolov5s_relu.rknn")
 
     botsort_args = yaml.safe_load(get_resource("botsort.yaml"))
