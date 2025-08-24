@@ -1,7 +1,12 @@
-
 import socket
 import fcntl
 import struct
+
+from autobot.utils.logging import stdout_logger
+
+
+logger = stdout_logger(__name__)
+
 
 def get_wlan0_ip(interface):
     try:
@@ -18,5 +23,5 @@ def get_wlan0_ip(interface):
         ip_addr = ip_addr[20:24]
         return socket.inet_ntoa(ip_addr)
     except OSError as e:
-        print(e)
+        logger.exception("Error fetching wlan0 ip")
         return None

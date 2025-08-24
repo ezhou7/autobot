@@ -8,11 +8,12 @@ import numpy as np
 # from mediapipe.python.solution_base import SolutionBase
 from mavsdk.action import ActionError
 
-from autobot.common import utils
+from autobot.utils import measure, get_wsl_host_ip
 # from dronecontrol.common.video_source import CameraSource, SimulatorSource
 from autobot.common.flight_controller import System
 # from autobot.follow import image_processing
 from autobot.follow.controller import Controller
+from autobot.utils.logging import stdout_logger
 
 # mp_pose = mp.solutions.pose
 
@@ -33,7 +34,7 @@ class Follow:
                       Empty string connects to a simulator on localhost.
         log: use an already created logger, makes a new one if None is provided 
         """
-        self.log = utils.stdout_logger(__name__) if log is None else log
+        self.log = stdout_logger(__name__) if log is None else log
         # self.input_handler = input.InputHandler()
         self.last_run_time = time.time()
         self.image_events = []
@@ -45,7 +46,7 @@ class Follow:
 
         # Connect with sim when no sim IP provided
         if use_simulator and not simulator_ip and not serial:
-            simulator_ip = utils.get_wsl_host_ip()
+            simulator_ip = get_wsl_host_ip()
         self.source = self.__get_source(simulator_ip, use_simulator)
 
         self.pilot = System(ip, port, serial is not None, serial)
@@ -88,7 +89,7 @@ class Follow:
         func_name = func.__name__
         if func_name not in self.measures:
             self.measures[func_name] = []
-        return await utils.measure(func, self.measures[func_name], is_async, *args)
+        return await measure(func, self.measures[func_name], is_async, *args)
 
     def log_measures(self):
         """Output average execution time for each recorded function across all iterations run."""
@@ -198,7 +199,7 @@ class Follow:
 
 
 def main(ip="", simulator=None, serial=None, port=None):
-    log = utils.stdout_logger(__name__)
+    log = stdout_logger(__name__)
     follow = Follow(ip, port, serial, simulator, log)
 
     try:

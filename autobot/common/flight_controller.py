@@ -7,7 +7,7 @@ from typing import NamedTuple, Callable, List
 from mavsdk.action import ActionError
 from mavsdk.telemetry import LandedState, FlightMode
 from mavsdk.offboard import OffboardError, VelocityBodyYawspeed, PositionNedYaw
-from autobot.common import utils
+from autobot.utils.logging import stdout_logger
 
 
 class Action(NamedTuple):
@@ -31,7 +31,7 @@ class System:
         self.port = port or self.DEFAULT_UDP_PORT
         self.serial = (serial_address if serial_address else self.DEFAULT_SERIAL_ADDRESS)
         self.mav = mavsdk.System()
-        self.log = utils.stdout_logger(__name__)
+        self.log = stdout_logger(__name__)
 
     def close(self):
         del self.mav

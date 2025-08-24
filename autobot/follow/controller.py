@@ -1,5 +1,5 @@
 from simple_pid import PID
-from autobot.common import utils
+from autobot.utils.logging import stdout_logger
 
 import numpy as np
 import time
@@ -23,7 +23,7 @@ class Controller:
     DEFAULT_FWD_TUNINGS = (4, 1, 0)
 
     def __init__(self, target_x, target_height, invert_yaw=False) -> None:
-        self.log = utils.stdout_logger(__name__)
+        self.log = stdout_logger(__name__)
 
         self.yaw_pid = PID()
         self.yaw_pid.tunings = self.DEFAULT_YAW_TUNINGS

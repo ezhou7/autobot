@@ -1,7 +1,7 @@
 import platform
 
 from autobot.utils.fs import read_file
-from autobot.common.utils import stdout_logger
+from autobot.utils.logging import stdout_logger
 
 
 DEVICE_COMPATIBLE_NODE = "/proc/device-tree/compatible"
