@@ -3,7 +3,7 @@ from ultralytics import YOLO
 from typing import Optional, Union
 
 from rknnlite.api import RKNNLite
-from autobot.device import AutoBotDevice
+from autobot.device import get_host
 
 
 RKNN_MODEL_TYPE = "rknn"
@@ -11,14 +11,13 @@ TORCH_MODEL_TYPE = "torch"
 
 
 class YoloModel:
-    def __init__(self, device: AutoBotDevice):
+    def __init__(self):
         self.model: Optional[Union[YOLO, RKNNLite]] = None
         self.model_type = ""
         self.tracker = None
-        self.device = device
 
     def load(self, model_path: str):
-        hostname = self.device.get_host()
+        hostname = get_host()
 
         if hostname in ["RK3576", "RK3588"]:
             from rknnlite.api import RKNNLite

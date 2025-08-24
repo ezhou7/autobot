@@ -6,7 +6,6 @@ from ultralytics.trackers import BOTSORT
 from ultralytics.engine.results import Results
 from autobot import get_resource
 from autobot.common import VIDEO_FRAME_WIDTH, VIDEO_FRAME_HEIGHT, FPS, STANDARD_CAPTURE
-from autobot.device import AutoBotDevice
 from autobot.model import YoloModel
 from autobot.utils import Properties
 from autobot.utils.postprocess import post_process_rknn, post_process_rknn_tracking, post_process_rknn_selecting
@@ -24,24 +23,15 @@ def video_capture():
     return capture
 
 
-def load_tracker_model():
-    botsort_args = yaml.safe_load(get_resource("botsort.yaml"))
-    props = Properties(botsort_args)
-    return BOTSORT(args=props, frame_rate=FPS)
-
-
 class AutoBotTracker:
     def __init__(self, yolo_model_path: str):
         self.cap = video_capture()
-        self.device = AutoBotDevice()
-        self.yolo = self.__load_yolo_model(yolo_model_path)
-        self.tracker = load_tracker_model()
-    
-    def __load_yolo_model(self, path: str):
-        yolo = YoloModel(self.device)
-        yolo.load(path)
 
-        return yolo
+        self.yolo = YoloModel()
+        self.yolo.load(yolo_model_path)
+
+        botsort_args = yaml.safe_load(get_resource("botsort.yaml"))
+        self.tracker = BOTSORT(args=Properties(botsort_args), frame_rate=FPS)
     
     def track(self, stop_flag, msg_broker):
         currently_selected_id = -1
