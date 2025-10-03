@@ -1,4 +1,4 @@
-Metadata-Version: 2.1
+Metadata-Version: 2.4
 Name: autobot
 Version: 1.0.0
 Summary: autobot
@@ -10,3 +10,5 @@ Requires-Dist: simple-pid
 Requires-Dist: mavsdk
 Requires-Dist: frozendict
 Requires-Dist: PyGObject
+Dynamic: requires-dist
+Dynamic: summary

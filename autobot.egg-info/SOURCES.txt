@@ -13,6 +13,7 @@ autobot.egg-info/requires.txt
 autobot.egg-info/top_level.txt
 autobot/common/__init__.py
 autobot/common/autopilot.py
+autobot/common/lidar.py
 autobot/common/queue.py
 autobot/common/utils.py
 autobot/follow/__init__.py
@@ -27,3 +28,7 @@ autobot/utils/__init__.py
 autobot/utils/fs.py
 autobot/utils/postprocess.py
 autobot/utils/yolov5.py
+flight_scripts/__init__.py
+flight_scripts/run_tracking_mission.py
+flight_scripts/staging_tracker.py
+flight_scripts/velocity_control.py
