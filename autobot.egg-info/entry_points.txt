@@ -1,3 +1,0 @@
-[console_scripts]
-autobot = autobot.main:main
-run_tracking_mission = flight_scripts.run_tracking_mission:main

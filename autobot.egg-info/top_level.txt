@@ -1,3 +1,0 @@
-autobot
-common
-flight_scripts
