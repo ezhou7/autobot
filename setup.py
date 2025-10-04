@@ -13,7 +13,8 @@ def setup_package():
         include_package_data=True,
         entry_points={
             "console_scripts": [
-                "autobot = autobot.main:main"
+                "autobot = autobot.main:main",
+                "run_tracking_mission = flight_scripts.run_tracking_mission:main"
             ]
         },
         install_requires=[
