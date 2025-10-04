@@ -28,6 +28,8 @@ autobot/utils/__init__.py
 autobot/utils/fs.py
 autobot/utils/postprocess.py
 autobot/utils/yolov5.py
+common/__init__.py
+common/lidar.py
 flight_scripts/__init__.py
 flight_scripts/run_tracking_mission.py
 flight_scripts/staging_tracker.py

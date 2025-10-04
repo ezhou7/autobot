@@ -27,6 +27,7 @@ async def async_main():
         await flight_controller_run(stop_flag, target_queue)
     except Exception as e:
         print(f"[Main] An error occurred in the flight controller: {e}")
+        raise Exception(e)
     finally:
         # --- Cleanup ---
         print("[Main] Mission finished. Cleaning up...")

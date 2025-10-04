@@ -21,6 +21,7 @@ def tracker_process(stop_flag, target_queue, yolo_model_path='yolov8n.pt'):
     cap = cv2.VideoCapture(VIDEO_CAPTURE_INDEX)
     cap.set(cv2.CAP_PROP_FRAME_WIDTH, FRAME_WIDTH)
     cap.set(cv2.CAP_PROP_FRAME_HEIGHT, FRAME_HEIGHT)
+    cap.set(cv2.CAP_PROP_FPS, 60)
 
     print("[Tracker] Tracker process started.")
     
@@ -33,8 +34,9 @@ def tracker_process(stop_flag, target_queue, yolo_model_path='yolov8n.pt'):
             print("[Tracker] Failed to grab frame.")
             break
 
-        # Run YOLOv8 tracking on the frame
-        results = model.track(frame, persist=True, verbose=False)
+        # Run YOLOv8 tracking on the frame, persisting tracks between frames
+        # and filtering for the 'person' class (class ID 0)
+        results = model.track(frame, persist=True, verbose=False, classes=0)
 
         # Get the bounding boxes and track IDs
         boxes = results[0].boxes.xywh.cpu()
@@ -69,9 +71,10 @@ def tracker_process(stop_flag, target_queue, yolo_model_path='yolov8n.pt'):
             if not target_found_in_frame and target_id is not None:
                 print(f"[Tracker] Lost target with ID: {target_id}. Searching for new target.")
                 target_id = None
-                # Clear the queue so the drone hovers
-                while not target_queue.empty():
-                    target_queue.get_nowait()
+                target_queue.put((-1, -1))
+                # # Clear the queue so the drone hovers
+                # while not target_queue.empty():
+                #     target_queue.get_nowait()
 
         cv2.imshow("YOLOv8 Tracking", annotated_frame)
 
