@@ -25,7 +25,8 @@ def setup_package():
             "simple-pid",
             "mavsdk",
             "frozendict",
-            "PyGObject"
+            "PyGObject",
+            "smbus2"
         ]
     )
 
