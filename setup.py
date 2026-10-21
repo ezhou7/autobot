@@ -14,7 +14,8 @@ def setup_package():
         entry_points={
             "console_scripts": [
                 "autobot = autobot.main:main",
-                "run_tracking_mission = flight_scripts.run_tracking_mission:main"
+                "run_tracking_mission = flight_scripts.run_tracking_mission:main",
+                "policy_hover = flight_scripts.policy_hover:main"
             ]
         },
         install_requires=[
@@ -26,7 +27,9 @@ def setup_package():
             "mavsdk",
             "frozendict",
             "PyGObject",
-            "smbus2"
+            "smbus2",
+            "pymavlink",
+            "ruamel.yaml"
         ]
     )
 
