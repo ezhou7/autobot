@@ -1,0 +1,6 @@
+# ArduPilot parameters for flying the hover policy (GUIDED + SET_ATTITUDE_TARGET).
+# Load with: python -m flight_scripts.policy_hover --params config/policy.parm ...
+# Reasons: docs/policy_integration.md
+GUID_OPTIONS     8      # bit 3: SET_ATTITUDE_TARGET thrust = throttle (not climb rate)
+GUID_TIMEOUT     0.3    # no command for 0.3 s -> level and hold altitude
+ATC_ANGLE_BOOST  0      # the policy already adds thrust when tilted

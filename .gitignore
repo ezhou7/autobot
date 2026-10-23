@@ -3,3 +3,5 @@ autobot_env/
 build/
 *.egg-info/
 **/__pycache__/
+.venv/
+logs/
