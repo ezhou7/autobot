@@ -15,7 +15,8 @@ def setup_package():
             "console_scripts": [
                 "autobot = autobot.main:main",
                 "run_tracking_mission = flight_scripts.run_tracking_mission:main",
-                "policy_hover = flight_scripts.policy_hover:main"
+                "policy_hover = flight_scripts.policy_hover:main",
+                "policy_track = flight_scripts.policy_track:main"
             ]
         },
         install_requires=[

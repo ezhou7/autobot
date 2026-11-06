@@ -1,0 +1,53 @@
+# Stereo camera and perception for the tracking policy
+# (flight_scripts/policy_track.py, device_scripts/stereo_check.py).
+# Copy this file and fill in your camera: docs/tracking_integration.md.
+
+# OpenCV stereo calibration (device_scripts/stereo_calibrate.py writes this
+# block). Values here are a placeholder: a 640x480 pair 6 cm apart with a
+# 90 deg horizontal field of view and no distortion.
+calibration:
+  image_size: [640, 480]          # one camera's frame, width x height
+  K1: [320, 0, 319.5,  0, 320, 239.5,  0, 0, 1]
+  D1: [0, 0, 0, 0, 0]
+  K2: [320, 0, 319.5,  0, 320, 239.5,  0, 0, 1]
+  D2: [0, 0, 0, 0, 0]
+  R: [1, 0, 0,  0, 1, 0,  0, 0, 1]
+  T: [-0.06, 0, 0]                # right camera in the left camera's frame, m
+
+capture:
+  left: 0                         # V4L2 device index or path
+  right: null                     # null: `left` is one side-by-side device (left | right)
+  fps: 30
+
+# The LEFT camera on the drone. Body frame: x forward, y left, z up, origin
+# at the drone's center. The policy was trained with its camera 0.20 m
+# forward, 0.03 m up and tilted 10 deg up; matching that keeps its view
+# closest to training.
+mount:
+  offset_m: [0.20, 0.03, 0.03]
+  tilt_up_deg: 10
+  yaw_left_deg: 0
+
+depth:
+  backend: hitnet                 # hitnet (learned, accurate) or sgbm (OpenCV, fast)
+  model: ~/models/hitnet/eth3d_240x320.onnx
+  threads: 2                      # leave CPU for the policy and YOLO
+  # sgbm options instead: min_range_m: 0.5, block: 5
+
+detector:
+  backend: rknn                   # rknn (Orange Pi NPU, YOLOv5, persons) or ultralytics
+  model: /home/orangepi/Documents/dev/models/yolov5s_relu.rknn
+  # ultralytics: model: yolov8n.pt, classes: [0], conf: 0.25
+
+selector:
+  relock_after: 15                # frames without the locked track before re-locking
+
+locator:
+  core: 0.5                       # middle share of the box used for range
+  disparity_sigma_px: 0.5
+  bearing_sigma_px: 3.0
+  center_offset_m: 0.0            # surface -> center of the target (e.g. 0.15 for a person)
+  max_range_m: 15.0
+
+filter:
+  accel_sigma: 3.0                # m/s^2, how hard the target can change velocity
