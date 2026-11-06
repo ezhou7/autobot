@@ -1,5 +1,8 @@
 # Flying the hover policy with autobot
 
+For the camera tracking policy (YOLO + stereo depth), see
+[tracking_integration.md](tracking_integration.md).
+
 autobot can load a hover policy trained in
 [ezhou7/dreamerv3](https://github.com/ezhou7/dreamerv3) (DreamerV3, F450
 model), run it on the CPU with NumPy, and fly it through ArduPilot over

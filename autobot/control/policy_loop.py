@@ -21,12 +21,16 @@ LOG_FIELDS = ("t", "obs", "action", "rates_frd", "thrust", "pos_ned", "vel_ned",
               "q", "att_age", "pos_age", "loop_dt", "clipped")
 
 
+HOVER_LAYOUT = {"R": slice(6, 15), "rel": slice(0, 3), "standoff": 0.0}
+
+
 @dataclass
 class LoopResult:
     completed: bool     # flew the whole duration
     taken_over: bool    # the pilot or ArduPilot left GUIDED or disarmed
     reason: str
-    log: dict           # LOG_FIELDS -> array with one row per step
+    log: dict           # LOG_FIELDS (+ the controller's extras) -> one row per step
+    layout: dict = None  # where the controller's observation keeps R and the target offset
 
     @property
     def steps(self):
@@ -35,10 +39,13 @@ class LoopResult:
     def summary(self):
         if self.steps == 0:
             return {"steps": 0}
-        # Distance from the hover point, skipping the hand-over transient.
-        error = np.linalg.norm(self.log["obs"][:, 0:3], axis=1)
+        lay = self.layout or HOVER_LAYOUT
+        # Distance from the hold point (the hover point, or standoff meters
+        # from the target), skipping the hand-over transient.
+        error = np.abs(np.linalg.norm(self.log["obs"][:, lay["rel"]], axis=1)
+                       - lay["standoff"])
         settled = error[len(error) // 2:]
-        cos_tilt = self.log["obs"][:, 6:15].reshape(-1, 3, 3)[:, 2, 2]   # body z . world z
+        cos_tilt = self.log["obs"][:, lay["R"]].reshape(-1, 3, 3)[:, 2, 2]   # body z . world z
         loop_dt = self.log["loop_dt"][1:]          # the first entry is not a full period
         telemetry_age = np.maximum(self.log["att_age"], self.log["pos_age"])
         rate_change = np.diff(self.log["rates_frd"], axis=0)
@@ -96,6 +103,7 @@ class PolicyLoop:
             cmd = self.controller.step(state, now)
             if not cmd.ok:
                 return self._result(rows, reason=cmd.reason)
+            extra = dict(self.controller.extra)
             self.vehicle.send_rates_thrust(cmd.rates_frd, cmd.thrust)
 
             att_age, pos_age = state.ages(now)
@@ -103,7 +111,7 @@ class PolicyLoop:
                 t=t, obs=cmd.obs, action=cmd.action, rates_frd=cmd.rates_frd,
                 thrust=cmd.thrust, pos_ned=state.pos_ned, vel_ned=state.vel_ned,
                 q=state.attitude_q, att_age=att_age, pos_age=pos_age,
-                loop_dt=now - last, clipped=cmd.clipped))
+                loop_dt=now - last, clipped=cmd.clipped, **extra))
             last = now
 
             next_tick += self.period
@@ -113,10 +121,12 @@ class PolicyLoop:
             else:
                 next_tick = time.monotonic()   # overran; don't try to catch up
 
-    @staticmethod
-    def _result(rows, completed=False, taken_over=False, reason=""):
-        log = {name: np.asarray([row[name] for row in rows]) for name in LOG_FIELDS}
-        return LoopResult(completed, taken_over, reason, log)
+    def _result(self, rows, completed=False, taken_over=False, reason=""):
+        names = list(LOG_FIELDS) + [k for k in (rows[0] if rows else {})
+                                    if k not in LOG_FIELDS]
+        log = {name: np.asarray([row[name] for row in rows]) for name in names}
+        return LoopResult(completed, taken_over, reason, log,
+                          getattr(self.controller, "layout", None))
 
     def _fall_back(self):
         # Don't override a pilot who switched modes in the meantime.

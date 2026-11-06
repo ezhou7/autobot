@@ -42,6 +42,9 @@ class PolicyController:
     """Hovers at the drone's position at hand-over.
     thrust_scale: MOT_THST_HOVER / TRAINED_HOVER_THRUST.
     """
+    # Where things sit in the logged observation (autobot/policy/spec.py).
+    layout = {"R": slice(6, 15), "rel": slice(0, 3), "standoff": 0.0}
+    extra = {}      # per-step values worth logging besides the observation
 
     def __init__(self, policy, limits=None, thrust_scale=1.0):
         self.policy = policy
