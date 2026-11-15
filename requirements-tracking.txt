@@ -1,0 +1,8 @@
+# The camera tracking policy (flight_scripts/policy_track.py), on top of
+# requirements-policy.txt. On the Orange Pi, YOLO runs on the NPU through
+# rknn-toolkit-lite2 (installed separately, as for autobot's tracker).
+-r requirements-policy.txt
+onnxruntime          # HITNet stereo depth
+opencv-python        # capture, rectification, SGBM
+ultralytics          # BoT-SORT tracking (and YOLOv8 off the Pi)
+pyyaml               # ultralytics' tracker config

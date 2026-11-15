@@ -41,6 +41,8 @@ class VehicleState:
     mode: str = ""
     armed: bool = False
     heartbeat_time: float = 0.0
+    range_down_m: float = float("nan")    # downward rangefinder (DISTANCE_SENSOR)
+    range_time: float = 0.0
 
     def ages(self, now=None):
         """Seconds since the last attitude and the last position message."""
@@ -223,6 +225,12 @@ class Vehicle:
                 self._state.pos_ned = np.array([msg.x, msg.y, msg.z])
                 self._state.vel_ned = np.array([msg.vx, msg.vy, msg.vz])
                 self._state.position_time = now
+        elif kind == "DISTANCE_SENSOR":
+            if msg.orientation == mavlink.MAV_SENSOR_ROTATION_PITCH_270:   # facing down
+                ok = msg.min_distance <= msg.current_distance <= msg.max_distance
+                with self._state_lock:
+                    self._state.range_down_m = msg.current_distance / 100.0 if ok else float("nan")
+                    self._state.range_time = now
         elif kind == "HEARTBEAT":
             if msg.get_srcComponent() != self.conn.target_component:
                 return
